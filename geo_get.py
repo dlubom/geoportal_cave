@@ -11,11 +11,20 @@ import time
 from PIL import Image
 from unidecode import unidecode
 import re
+import time
+
+sleep_time = 0
+date_name = '180924'
+img_folder = '{0}_img'.format(date_name)
+
+import os
+if not os.path.exists(img_folder):
+    os.makedirs(img_folder)
 
 rows_list = []
 arr_img = []
-
-for i in range(380, 11400):  # 11400
+    
+for i in range(380, 450):  # 11400
     print('getting: ', i)
     url = "http://jaskiniepolski.pgi.gov.pl/Details/Information/" + str(i)
     try:
@@ -41,20 +50,20 @@ for i in range(380, 11400):  # 11400
             for a in a_tab:
                 key = a.get_text().strip()
                 img_num = a.get('onclick').replace('showImageInfo(', '').replace(')', '')
-                # time.sleep(1)
+                time.sleep(sleep_time)
                 r = requests.post("http://jaskiniepolski.pgi.gov.pl/Details/ImageInformation", data={'id': img_num})
                 if r.status_code == 200:
                     j_img = json.loads(r.text)
                     j_img['index'] = i
                     arr_img.append(j_img)
-                    # time.sleep(1)
+                    time.sleep(sleep_time)
                 else:
                     print(r)
                 url = "http://jaskiniepolski.pgi.gov.pl/Details/RenderImage?id={0}&zoom=5&ifGet=false&date={1}".format(
                     img_num, calendar.timegm(time.gmtime()))
                 r = requests.get(url)
                 if r.status_code == 200:
-                    file_name = "img/{0}_{1}_{2}_{3}.jpg".format(i, img_num, j_img['grafika_nazwa'].replace(' ', '_'),
+                    file_name = "{0}/{1}_{2}_{3}_{4}.jpg".format(img_folder, i, img_num, j_img['grafika_nazwa'].replace(' ', '_'),
                                                                  re.sub(r'\s\(.*\)', '', unidecode(d['Nazwa'])).replace(
                                                                      ' ', '_').replace('"', '_'))
                     with open(file_name, 'wb') as f:  # TODO add replace
@@ -96,9 +105,8 @@ for i in range(380, 11400):  # 11400
             val = re.sub('  +', ' ', val)
             d[name.strip()] = unicodedata.normalize("NFKD", val)
     d['index'] = i
-    # temp_df = pd.DataFrame(d, index = [i])
     rows_list.append(d)
-    # time.sleep(1)
+    time.sleep(sleep_time)
 
 df = pd.DataFrame(rows_list)
 df_img = pd.DataFrame(arr_img)
@@ -106,11 +114,11 @@ df_img = pd.DataFrame(arr_img)
 df.set_index('index')
 # TODO check numners of results with search page
 
-df.to_pickle("jaskinie_20180716.pickle")
-df_img.to_pickle("img_20180716.pickle")
+df.to_pickle('jaskinie_{0}.pickle'.format(date_name))
+df_img.to_pickle('img_{0}.pickle'.format(date_name))
 
-df.to_csv('jaskinie_20180716.csv')
-df_img.to_csv('img_20180716.csv')
+df.to_csv('jaskinie_{0}.csv'.format(date_name))
+df_img.to_csv('img_{0}.csv'.format(date_name))
 
 # TODO http://potrace.sourceforge.net/
 # TODO https://pypi.org/project/pypotrace/
