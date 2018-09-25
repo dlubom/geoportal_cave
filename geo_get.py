@@ -24,7 +24,7 @@ if not os.path.exists(img_folder):
 rows_list = []
 arr_img = []
     
-for i in range(380, 450):  # 11400
+for i in range(380, 11400):  # 11400
     print('getting: ', i)
     url = "http://jaskiniepolski.pgi.gov.pl/Details/Information/" + str(i)
     try:
@@ -101,7 +101,10 @@ for i in range(380, 450):  # 11400
                 d['DMS lat'] = caveLatLon.to_string('d% %m% %S% %H')[0]
                 d['DMS lon'] = caveLatLon.to_string('d% %m% %S% %H')[1]
         else:
+            if columns[1].find('style') != None:
+                columns[1].style.extract()
             val = columns[1].get_text().strip()
+            print(val)
             val = re.sub('  +', ' ', val)
             d[name.strip()] = unicodedata.normalize("NFKD", val)
     d['index'] = i
@@ -119,6 +122,12 @@ df_img.to_pickle('img_{0}.pickle'.format(date_name))
 
 df.to_csv('jaskinie_{0}.csv'.format(date_name))
 df_img.to_csv('img_{0}.csv'.format(date_name))
+
+writer = pd.ExcelWriter('{0}.xlsx'.format(date_name))
+df.to_excel(writer,'jaskinie')
+df_img.to_excel(writer,'img')
+writer.save()
+
 
 # TODO http://potrace.sourceforge.net/
 # TODO https://pypi.org/project/pypotrace/
