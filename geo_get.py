@@ -13,6 +13,7 @@ from unidecode import unidecode
 import re
 import time
 import sys
+import os
 
 max_rec = 0x100000
 sys.setrecursionlimit(max_rec)
@@ -21,13 +22,12 @@ sleep_time = 0
 date_name = '181023'
 img_folder = '{0}_img'.format(date_name)
 
-import os
 if not os.path.exists(img_folder):
     os.makedirs(img_folder)
 
 rows_list = []
 arr_img = []
-    
+
 for i in range(380, 11400):  # 11400
     print('getting: ', i)
     url = "http://jaskiniepolski.pgi.gov.pl/Details/Information/" + str(i)
@@ -67,7 +67,8 @@ for i in range(380, 11400):  # 11400
                     img_num, calendar.timegm(time.gmtime()))
                 r = requests.get(url)
                 if r.status_code == 200:
-                    file_name = "{0}/{1}_{2}_{3}_{4}.jpg".format(img_folder, i, img_num, j_img['grafika_nazwa'].replace(' ', '_'),
+                    file_name = "{0}/{1}_{2}_{3}_{4}.jpg".format(img_folder, i, img_num,
+                                                                 j_img['grafika_nazwa'].replace(' ', '_'),
                                                                  re.sub(r'\s\(.*\)', '', unidecode(d['Nazwa'])).replace(
                                                                      ' ', '_').replace('"', '_'))
                     with open(file_name, 'wb') as f:  # TODO add replace
@@ -109,8 +110,8 @@ for i in range(380, 11400):  # 11400
                 columns[1].style.extract()
             val = columns[1].get_text().strip()
             val = re.sub('  +', ' ', val)
-            d[name.strip()] = val #unicodedata.normalize("NFKD", val)
-            d[name.strip()+'_ORG_HTML']=columns[1]
+            d[name.strip()] = val  # unicodedata.normalize("NFKD", val)
+            d[name.strip() + '_ORG_HTML'] = columns[1]
             # print(columns[1])
     d['index'] = i
     rows_list.append(d)
@@ -147,10 +148,9 @@ df.to_csv('jaskinie_{0}.csv'.format(date_name))
 df_img.to_csv('img_{0}.csv'.format(date_name))
 
 writer = pd.ExcelWriter('{0}.xlsx'.format(date_name))
-df.to_excel(writer,'jaskinie')
-df_img.to_excel(writer,'img')
+df.to_excel(writer, 'jaskinie')
+df_img.to_excel(writer, 'img')
 writer.save()
-
 
 # TODO http://potrace.sourceforge.net/
 # TODO https://pypi.org/project/pypotrace/
