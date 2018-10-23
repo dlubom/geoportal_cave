@@ -12,9 +12,13 @@ from PIL import Image
 from unidecode import unidecode
 import re
 import time
+import sys
+
+max_rec = 0x100000
+sys.setrecursionlimit(max_rec)
 
 sleep_time = 0
-date_name = '180924'
+date_name = '181023'
 img_folder = '{0}_img'.format(date_name)
 
 import os
@@ -104,9 +108,10 @@ for i in range(380, 11400):  # 11400
             if columns[1].find('style') is not None:
                 columns[1].style.extract()
             val = columns[1].get_text().strip()
-            print(val)
             val = re.sub('  +', ' ', val)
-            d[name.strip()] = unicodedata.normalize("NFKD", val)
+            d[name.strip()] = val #unicodedata.normalize("NFKD", val)
+            d[name.strip()+'_ORG_HTML']=columns[1]
+            # print(columns[1])
     d['index'] = i
     rows_list.append(d)
     time.sleep(sleep_time)
@@ -127,12 +132,13 @@ df['Zniszczona, niedostępna lub nieodnaleziona'] = df['Zniszczona, niedostępna
 df['Ekspozycja otworu'] = df['Ekspozycja otworu'].astype('category')
 df['Województwo'] = df['Województwo'].astype('category')
 
-df['Długość [m] w tym szacowane [m]'] =  df['Długość [m] w tym szacowane [m]'].str.replace(',', '.')
-df['Długość']=pd.to_numeric(df['Długość [m] w tym szacowane [m]'].str.split(';', expand=True)[0])
-df['Długość szacowana']=pd.to_numeric(df['Długość [m] w tym szacowane [m]'].str.split(';', expand=True)[1])
-df=df.drop(['Długość [m] w tym szacowane [m]'], axis=1)
+# TODO something wrong with this
+# df['Długość [m] w tym szacowane [m]'] =  df['Długość [m] w tym szacowane [m]'].str.replace(',', '.')
+# df['Długość']=pd.to_numeric(df['Długość [m] w tym szacowane [m]'].str.split(';', expand=True)[0])
+# df['Długość szacowana']=pd.to_numeric(df['Długość [m] w tym szacowane [m]'].str.split(';', expand=True)[1])
+# df=df.drop(['Długość [m] w tym szacowane [m]'], axis=1)
 
-# TODO check numners of results with search page
+# TODO check numbers of results with search page
 
 df.to_pickle('jaskinie_{0}.pickle'.format(date_name))
 df_img.to_pickle('img_{0}.pickle'.format(date_name))
