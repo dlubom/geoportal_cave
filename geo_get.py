@@ -101,7 +101,7 @@ for i in range(380, 11400):  # 11400
                 d['DMS lat'] = caveLatLon.to_string('d% %m% %S% %H')[0]
                 d['DMS lon'] = caveLatLon.to_string('d% %m% %S% %H')[1]
         else:
-            if columns[1].find('style') != None:
+            if columns[1].find('style') is not None:
                 columns[1].style.extract()
             val = columns[1].get_text().strip()
             print(val)
@@ -115,6 +115,23 @@ df = pd.DataFrame(rows_list)
 df_img = pd.DataFrame(arr_img)
 
 df.set_index('index')
+
+df['Deniwelacja [m]'] = pd.to_numeric(df['Deniwelacja [m]'].str.replace(',', '.'))
+df['Głębokość [m]'] = pd.to_numeric(df['Głębokość [m]'].str.replace(',', '.'))
+df['Wysokość względna [m]'] = pd.to_numeric(df['Wysokość względna [m]'].str.replace(',', '.'))
+df['Wysokość bezwzględna [m n.p.m.]'] = pd.to_numeric(df['Wysokość bezwzględna [m n.p.m.]'].str.replace(',', '.'))
+df['Przewyższenie [m]'] = pd.to_numeric(df['Przewyższenie [m]'].str.replace(',', '.'))
+df['Rozciągłość horyzontalna [m]'] = pd.to_numeric(df['Rozciągłość horyzontalna [m]'].str.replace(',', '.'))
+
+df['Zniszczona, niedostępna lub nieodnaleziona'] = df['Zniszczona, niedostępna lub nieodnaleziona'].astype('category')
+df['Ekspozycja otworu'] = df['Ekspozycja otworu'].astype('category')
+df['Województwo'] = df['Województwo'].astype('category')
+
+df['Długość [m] w tym szacowane [m]'] =  df['Długość [m] w tym szacowane [m]'].str.replace(',', '.')
+df['Długość']=pd.to_numeric(df['Długość [m] w tym szacowane [m]'].str.split(';', expand=True)[0])
+df['Długość szacowana']=pd.to_numeric(df['Długość [m] w tym szacowane [m]'].str.split(';', expand=True)[1])
+df=df.drop(['Długość [m] w tym szacowane [m]'], axis=1)
+
 # TODO check numners of results with search page
 
 df.to_pickle('jaskinie_{0}.pickle'.format(date_name))
