@@ -19,7 +19,7 @@ max_rec = 0x100000
 sys.setrecursionlimit(max_rec)
 
 sleep_time = 0
-date_name = '181023'
+date_name = '181024'
 img_folder = '{0}_img'.format(date_name)
 
 if not os.path.exists(img_folder):
@@ -111,8 +111,15 @@ for i in range(380, 11400):  # 11400
             val = columns[1].get_text().strip()
             val = re.sub('  +', ' ', val)
             d[name.strip()] = val  # unicodedata.normalize("NFKD", val)
-            d[name.strip() + '_ORG_HTML'] = columns[1]
-            # print(columns[1])
+            
+            invalid_tags = ['div']
+            for tag in invalid_tags: 
+                for match in columns[1].findAll(tag):
+                    match.replaceWithChildren()
+            raw_val = "".join(str(item) for item in columns[1].contents).strip()
+            if raw_val != val:
+                d[name.strip() + '_ORG_HTML'] = raw_val
+                # print(d[name.strip() + '_ORG_HTML'])
     d['index'] = i
     rows_list.append(d)
     time.sleep(sleep_time)
