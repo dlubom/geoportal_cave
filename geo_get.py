@@ -19,7 +19,7 @@ max_rec = 0x100000
 sys.setrecursionlimit(max_rec)
 
 sleep_time = 0
-date_name = '181024'
+date_name = '181025'
 img_folder = '{0}_img'.format(date_name)
 
 if not os.path.exists(img_folder):
@@ -117,6 +117,7 @@ for i in range(380, 11400):  # 11400
                 for match in columns[1].findAll(tag):
                     match.replaceWithChildren()
             raw_val = "".join(str(item) for item in columns[1].contents).strip()
+            raw_val = re.sub('  +', ' ', raw_val)
             if raw_val != val:
                 d[name.strip() + '_ORG_HTML'] = raw_val
                 # print(d[name.strip() + '_ORG_HTML'])
@@ -128,6 +129,8 @@ df = pd.DataFrame(rows_list)
 df_img = pd.DataFrame(arr_img)
 
 df.set_index('index')
+
+df=df.drop(df.index[3673]) #drop lorem i psum record
 
 df['Deniwelacja [m]'] = pd.to_numeric(df['Deniwelacja [m]'].str.replace(',', '.'))
 df['Głębokość [m]'] = pd.to_numeric(df['Głębokość [m]'].str.replace(',', '.'))
